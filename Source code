@@ -1,0 +1,59 @@
+# Import libraries
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+
+# Load dataset
+data = load_breast_cancer()
+X = data.data
+y = data.target
+
+# Dataset Description
+print(f"Dataset Features: {data.feature_names}")
+print(f"Target Classes: {data.target_names}")
+
+# Split dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize the dataset
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Train a Random Forest Classifier
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy * 100:.2f}%")
+
+# Function to predict new data
+def predict_tumor(features):
+    """
+    Predicts whether the tumor is benign or malignant based on input features.
+    Input: features (list of 30 values corresponding to dataset features)
+    Output: "Benign" or "Malignant"
+    """
+    scaled_features = scaler.transform([features])
+    prediction = model.predict(scaled_features)
+    return "Malignant" if prediction[0] == 1 else "Benign"
+
+# Example usage
+example_features = X_test[0]  # Taking one sample from the test set
+print("\nExample Prediction:")
+print(f"Features: {example_features}")
+print(f"Prediction: {predict_tumor(example_features)}")
